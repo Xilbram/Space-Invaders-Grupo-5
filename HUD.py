@@ -34,6 +34,7 @@ class HUD(pygame.sprite.Sprite):
         nivel_atual_display = self.fonte_letreiros.render("Nível: {}".format(nivel), True, (255,255,255))
         return self.janela.blit(nivel_atual_display, (self.__largura_janela - nivel_atual_display.get_width(), 10))
 
+    #to tentando mesclar o que eu fiz com o da Mariana, pq o dela tem verificação de inserção
     #def mostrar_vida(self, jogador: Jogador):
         #if isinstance(jogador, Jogador):
             #vida_jogador_display = self.fonte_letreiros.render("Vida {}".format(jogador), True, (255, 0, 0))
