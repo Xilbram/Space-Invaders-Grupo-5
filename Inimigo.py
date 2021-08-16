@@ -159,7 +159,7 @@ class Kamikaze(Nave, pygame.sprite.Sprite):
             jogador.rect.x -= 50
         else:
             jogador.rect.x += 50
-        if jogador.rect.y+jogador.altura <= self.rect.y+self.altura/2:
+        if jogador.rect.y+jogador.rect.bottom <= self.rect.y+self.altura/2:
             jogador.rect.y -= 100
         else:
             jogador.rect.y += 100
