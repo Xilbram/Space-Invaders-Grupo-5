@@ -2,11 +2,7 @@ import pygame
 from pygame.locals import *
 from abc import ABC, abstractmethod
 import random
-from Tiro import Tiro
-
-display_largura = 750 
-display_altura = 600
-DisplayJogo = pygame.display.set_mode((display_largura,display_altura))
+from Tiro2 import Tiro
 
 posicoesx = [0,50,100,150,200,250,300,350,400,450,500,550,600,650,700]
 posicoesy = [80,160,240]
@@ -20,6 +16,7 @@ class Inimigo(pygame.sprite.Sprite, ABC):
         self.__altura = 70
         self.__largura = 30
         self.__cor = (0,255,0)
+        self.__vida = 50
         self.__formato_geometrico = pygame.image.load("retanguloinimigo.png")
         self.__rect = self.__formato_geometrico.get_rect()
         self.mask = pygame.mask.from_surface(self.__formato_geometrico)
@@ -92,28 +89,31 @@ class Inimigo(pygame.sprite.Sprite, ABC):
     def movimento(self):
         pass
     
-    def geracao(self):
-        DisplayJogo.blit(self.__formato_geometrico, (self.__rect.x,self.__rect.y))
+    def geracao(self, display):
+        display.blit(self.__formato_geometrico, (self.__rect.x,self.__rect.y))
 
 class Nave(Inimigo, pygame.sprite.Sprite, ABC):
     @abstractmethod
-    def __init__(self):
+    def __init__(self, largura):
         super().__init__()
         self.__frequencia_tiro = 2
         self.__direcao = random.randint(0,1)
         if self.__direcao == 0:
             self.rect.x = random.randint(-500, -10)
         else:
-            self.rect.x = random.randint(display_largura+10, display_largura+500)
+            self.rect.x = random.randint(largura+10, largura+500)
         self.__maxiposi = posicoesx[random.randint(0,len(posicoesx)-1)]
+        self.tiros = pygame.sprite.Group()
+        self.__tiro_temporizador = 0
+        self.__cooldown_tiro = 2
     
     @property
-    def frequencia_tiro(self):
-        return self.__frequencia_tiro
+    def tiro_temporizador(self):
+        return self.__tiro_temporizador
     
-    @frequencia_tiro.setter
-    def frequencia_tiro(self, frequencia_tiro):
-        self.__frequencia_tiro = frequencia_tiro
+    @tiro_temporizador.setter
+    def tiro_temporizador(self, tiro_temporizador):
+        self.__tiro_temporizador = tiro_temporizador
 
     @property
     def maxiposi(self):
@@ -123,11 +123,10 @@ class Nave(Inimigo, pygame.sprite.Sprite, ABC):
     def direcao(self):
         return self.__direcao
 
-    def disparar(self, tempo_tiro, tiros_inimigo):
-        if tempo_tiro == 0:
-            novo_tiro = Tiro(self.rect.x, self.rect.y+self.altura+20)
-            novo_tiro.velocidade *= -1
-            tiros_inimigo.add(novo_tiro)
+    def disparar(self, janela):
+        if self.__tiro_temporizador >= self.__cooldown_tiro:
+            self.tiros.add(Tiro(self.rect.center, 6, janela))
+            self.__tiro_temporizador = 0
 
     def movimento(self):
         if self.__direcao == 0:
@@ -138,12 +137,12 @@ class Nave(Inimigo, pygame.sprite.Sprite, ABC):
                 self.rect.x -= self.velocidade
 
 class NaveComum(Nave, pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, largura):
+        super().__init__(largura)
 
 class Kamikaze(Nave, pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, largura):
+        super().__init__(largura)
         self.formato_geometrico = pygame.image.load("retangulokamikaze.png")
         self.__dano_explosao = 20
     
@@ -165,17 +164,17 @@ class Kamikaze(Nave, pygame.sprite.Sprite):
         else:
             jogador.rect.y += 100
 
-    def movimento(self, inimigos):
+    def movimento(self, inimigos, altura):
         super().movimento()
         if self.direcao == 0:
             if self.rect.x >= self.maxiposi:
-                if self.rect.y <= display_altura:
+                if self.rect.y <= altura:
                     self.rect.y += self.velocidade
                 else:
                     inimigos.remove(self)
         else:
             if self.rect.x <= self.maxiposi:
-                if self.rect.y <= display_altura:
+                if self.rect.y <= altura:
                     self.rect.y += self.velocidade
                 else:
                     inimigos.remove(self)
@@ -199,8 +198,8 @@ class Meteoro(Inimigo, pygame.sprite.Sprite):
     def recompensa(self, recompensa):
         self.__recompensa = recompensa
     
-    def movimento(self, inimigos):
-        if self.rect.y < display_altura+10:
+    def movimento(self, inimigos, altura):
+        if self.rect.y < altura+10:
             self.rect.y += self.velocidade
         else:
             inimigos.remove(self)
