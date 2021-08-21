@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 from abc import ABC, abstractmethod
 import random
-from Tiro2 import Tiro
+from Tiro import Tiro
 
 posicoesx = [0,50,100,150,200,250,300,350,400,450,500,550,600,650,700]
 posicoesy = [80,160,240]
