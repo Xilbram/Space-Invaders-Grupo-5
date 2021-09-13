@@ -1,5 +1,5 @@
 import pygame
-
+#teste
 class Tiro(pygame.sprite.Sprite):
     def __init__(self, posicao, velocidade, tamanho_janela):
         super().__init__()
